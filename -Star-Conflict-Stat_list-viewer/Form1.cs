@@ -399,39 +399,38 @@ namespace _Star_Conflict_Stat_list_viewer
         }
         public void read_log_for_gamelist()                                       // Функция считывания логфайла для получения списка игр, и списка пилотов в играх
         {
-            this.comboBox1.ResetText();
+            this.comboBox1.ResetText(); // Очищаем комбобокс
             this.comboBox1.Items.Clear();
-            List <string> game = new List<string>();
-             
+            List <string> game = new List<string>(); // создаем список, в котором будем хранить каждую карту
             OpenFileDialog open = new OpenFileDialog();
             open.Filter = "combat.log | combat.log"; // открываем файл
-            string dir = Application.StartupPath + "\\player_for_game";
+            string dir = Application.StartupPath + "\\player_for_game"; // папка, в которой будем хранить список пилотов по каждой игре
             if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
             string startgame = "Start gameplay";                  // так же элемент для проверки
             string player_example = "Spawn SpaceShip for player"; // элемент для проверки
             if (open.ShowDialog() == DialogResult.OK)
             {
-                FileStream fs1 = new FileStream(open.FileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
-                StreamReader read = new StreamReader(fs1, Encoding.UTF8);
+                FileStream fs1 = new FileStream(open.FileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete); // открываем поток чтения файла с правами для чтения, записи и удаления
+                StreamReader read = new StreamReader(fs1, Encoding.UTF8); // читаем файл с помощью стримридера, открывается как байткод, переводим прочитанное в UTF8
                 while (true)
                 {
-                    string strings = read.ReadLine();
-                    if (strings == null)
+                    string strings = read.ReadLine();  // читаем строку из файла
+                    if (strings == null)               // если конец файла - выходим из цикла
                     {
                         break;
                     }
 
                     else
-                        if (strings.Contains(startgame))
+                        if (strings.Contains(startgame)) // если содержит Start gameplay
                     {
-                        game.Add(strings);
+                        game.Add(strings);               // добавляем в лист с списком игр
                     }
                     else
-                        continue;
+                        continue;                        
                 }
-                read.Close();
+                read.Close();   // закрываем потоки чтения 
                 fs1.Close();
-                FileStream fs2 = new FileStream(open.FileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
+                FileStream fs2 = new FileStream(open.FileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete); // открываем новый поток чтения файла с правами для чтения, записи и удаления
                 using (StreamReader reader = new StreamReader(fs2, Encoding.UTF8))
                     for (int i = 0; i < game.Count; i++)
                     {
@@ -439,23 +438,23 @@ namespace _Star_Conflict_Stat_list_viewer
                         while (true)
                         {
                             string player = reader.ReadLine();
-                            if (player == null)
+                            if (player == null) // если конец файла - выходим из цикла
                             {
                                 break;
                             }
-                            if (player.Contains("Start PVE mission"))
+                            if (player.Contains("Start PVE mission")) // если ПВЕ - выходим из цикла
                             {
                                 break;
                             }
-                            if (player.Contains(game.ElementAt(i)))
+                            if (player.Contains(game.ElementAt(i))) // если содержит номер текущей игры - начинаем считывать список пилотов
                             {
                                 continue;
                             }
-                            if (player.Contains(game.ElementAt(game.Count - 1)))
+                            if (player.Contains(game.ElementAt(game.Count - 1))) // если содержит номер следующей игры - выходим из цикла
                             {
                                 break;
                             }
-                            if (i < game.Count - 1)
+                            if (i < game.Count - 1) 
                             {
                                 if (player.Contains(game.ElementAt(i + 1)))
                                 {
@@ -463,9 +462,9 @@ namespace _Star_Conflict_Stat_list_viewer
                                 }
                             }
 
-                            if (player.Contains(player_example))
+                            if (player.Contains(player_example))                    // если в строке есть запись о спавне игрока - заносим в список игроков
                             {
-                                string q = player.Substring(player.IndexOf('(') + 1);
+                                string q = player.Substring(player.IndexOf('(') + 1); // обрезаем строку так, чтоб получилось лишь имя игрока
                                 q = q.Remove(q.IndexOf(','));
                                 if (players.Contains(q))
                                 {
@@ -475,11 +474,11 @@ namespace _Star_Conflict_Stat_list_viewer
                             }
 
                         }
-                        string g = game.ElementAt(i).Substring(46);
-                        string times = game.ElementAt(i);
-                        times = times.Remove(times.IndexOf(' '), times.Length - times.IndexOf(' '));
-                        times = times.Replace(':', '.');
-                        var gg = g.Remove(g.IndexOf(','), g.Length - g.IndexOf(','));
+                        string g = game.ElementAt(i).Substring(46);                                 // обрезаем строку с наименованием карты до читаемого вида
+                        string times = game.ElementAt(i);                                           //
+                        times = times.Remove(times.IndexOf(' '), times.Length - times.IndexOf(' '));//
+                        times = times.Replace(':', '.');                                            //
+                        var gg = g.Remove(g.IndexOf(','), g.Length - g.IndexOf(','));               //
 
                         string path = dir + "\\" + times + " [" + gg + "].txt";
                         bool append = false;                                                       // Если нужно перезаписывать файл
@@ -487,7 +486,7 @@ namespace _Star_Conflict_Stat_list_viewer
 
                         if (!File.Exists(path))
                         {
-                            File.Create(path);                                 // Если файла не существует, создаем
+                            File.Create(path);                                                      // Если файла не существует, создаем
                         }
 
                         for (int j = 0; j < players.Count; j++)
@@ -594,8 +593,8 @@ namespace _Star_Conflict_Stat_list_viewer
             new_stream_combo.Close();
         }
     }
-    class SelectData
-    {
+    class SelectData                                // класс для отображения в комбобоксе удобочитаемого текста
+    {                                               // вместо полного пути к файлу с пилотами
         public readonly string Value;
         public readonly string Text;
         public SelectData(string Value, string Text)
