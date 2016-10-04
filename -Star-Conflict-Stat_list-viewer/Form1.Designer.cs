@@ -48,6 +48,8 @@
             this.label1 = new System.Windows.Forms.Label();
             this.clean_data = new System.Windows.Forms.Button();
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
+            this.work_button = new System.Windows.Forms.Button();
+            this.comboBox1 = new System.Windows.Forms.ComboBox();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -70,7 +72,7 @@
             this.dataGridView1.RowsDefaultCellStyle = dataGridViewCellStyle2;
             this.dataGridView1.RowTemplate.ReadOnly = true;
             this.dataGridView1.RowTemplate.Resizable = System.Windows.Forms.DataGridViewTriState.False;
-            this.dataGridView1.Size = new System.Drawing.Size(920, 396);
+            this.dataGridView1.Size = new System.Drawing.Size(729, 533);
             this.dataGridView1.TabIndex = 0;
             // 
             // new_pilots
@@ -231,11 +233,33 @@
             this.clean_data.UseVisualStyleBackColor = true;
             this.clean_data.Click += new System.EventHandler(this.clean_data_Click);
             // 
+            // work_button
+            // 
+            this.work_button.Location = new System.Drawing.Point(11, 402);
+            this.work_button.Name = "work_button";
+            this.work_button.Size = new System.Drawing.Size(331, 95);
+            this.work_button.TabIndex = 21;
+            this.work_button.Text = "Выбрать логфайл и составить список пилотов \r\nпо каждой битве, что содержит лог";
+            this.work_button.UseVisualStyleBackColor = true;
+            this.work_button.Click += new System.EventHandler(this.work_button_Click);
+            // 
+            // comboBox1
+            // 
+            this.comboBox1.FormattingEnabled = true;
+            this.comboBox1.ImeMode = System.Windows.Forms.ImeMode.Off;
+            this.comboBox1.Location = new System.Drawing.Point(11, 503);
+            this.comboBox1.Name = "comboBox1";
+            this.comboBox1.Size = new System.Drawing.Size(331, 24);
+            this.comboBox1.TabIndex = 22;
+            this.comboBox1.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1270, 408);
+            this.ClientSize = new System.Drawing.Size(1086, 539);
+            this.Controls.Add(this.comboBox1);
+            this.Controls.Add(this.work_button);
             this.Controls.Add(this.clean_data);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.label3);
@@ -287,6 +311,8 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button clean_data;
         private System.Windows.Forms.SaveFileDialog saveFileDialog1;
+        private System.Windows.Forms.Button work_button;
+        private System.Windows.Forms.ComboBox comboBox1;
     }
 }
 

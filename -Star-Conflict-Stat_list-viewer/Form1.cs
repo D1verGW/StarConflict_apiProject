@@ -8,11 +8,11 @@ using System.IO;
 using System.Net.Http;
 using System.Data;
 using System.Text.RegularExpressions;
-
-
+using System.Text;
 
 namespace _Star_Conflict_Stat_list_viewer
 {
+    
     public partial class MainForm : Form
     {
         public Excel.Application app;
@@ -33,8 +33,9 @@ namespace _Star_Conflict_Stat_list_viewer
         private void MainForm_Load(object sender, EventArgs e)                    // Обработка событий при загрузке приложения
         {
             pilots_list = "flot_list.txt";
-            dataGridView1.Columns.Add("Name", "Никнейм");
             dataGridView1.Columns.Add("ID", "uID");
+            dataGridView1.Columns.Add("Name", "Никнейм");
+            
             dataGridView1.Columns.Add("Corp", "Корпорация");
             dataGridView1.Columns.Add("CorpTag", "Тэг");
             dataGridView1.Columns.Add("PlayBattle", "Сыграно битв");
@@ -116,7 +117,6 @@ namespace _Star_Conflict_Stat_list_viewer
         }
         public async void load_data()                                             // Загружаем данные по текущему списку флота
         {
-
             StreamReader stream = new StreamReader(pilots_list); // создаем поток для считывания списка пилотов
             List<string> pilots = new List<string>();            // создаем список List, в котором будем хранить считанные данные
             while (!stream.EndOfStream)
@@ -240,7 +240,7 @@ namespace _Star_Conflict_Stat_list_viewer
                                          // Пока не закрыть приложение EXCEL.EXE будет висеть в процессах
             }
         }
-        public void export_to_exel()                                              // Экспорт данных в Эксель (спижжено, без комментариев)
+        public void export_to_exel()                                              // Экспорт данных в Эксель 
         {
 
 
@@ -397,7 +397,110 @@ namespace _Star_Conflict_Stat_list_viewer
             load_to_exel_button.Enabled = false;
             load_to_xml_button.Enabled = false;
         }
-        
+        public void read_log_for_gamelist()                                       // Функция считывания логфайла для получения списка игр, и списка пилотов в играх
+        {
+            this.comboBox1.ResetText();
+            this.comboBox1.Items.Clear();
+            List <string> game = new List<string>();
+             
+            OpenFileDialog open = new OpenFileDialog();
+            open.Filter = "combat.log | combat.log"; // открываем файл
+            string dir = Application.StartupPath + "\\player_for_game";
+            if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
+            string startgame = "Start gameplay";                  // так же элемент для проверки
+            string player_example = "Spawn SpaceShip for player"; // элемент для проверки
+            if (open.ShowDialog() == DialogResult.OK)
+            {
+                FileStream fs1 = new FileStream(open.FileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
+                StreamReader read = new StreamReader(fs1, Encoding.UTF8);
+                while (true)
+                {
+                    string strings = read.ReadLine();
+                    if (strings == null)
+                    {
+                        break;
+                    }
+
+                    else
+                        if (strings.Contains(startgame))
+                    {
+                        game.Add(strings);
+                    }
+                    else
+                        continue;
+                }
+                read.Close();
+                fs1.Close();
+                FileStream fs2 = new FileStream(open.FileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
+                using (StreamReader reader = new StreamReader(fs2, Encoding.UTF8))
+                    for (int i = 0; i < game.Count; i++)
+                    {
+                        List<string> players = new List<string>();
+                        while (true)
+                        {
+                            string player = reader.ReadLine();
+                            if (player == null)
+                            {
+                                break;
+                            }
+                            if (player.Contains("Start PVE mission"))
+                            {
+                                break;
+                            }
+                            if (player.Contains(game.ElementAt(i)))
+                            {
+                                continue;
+                            }
+                            if (player.Contains(game.ElementAt(game.Count - 1)))
+                            {
+                                break;
+                            }
+                            if (i < game.Count - 1)
+                            {
+                                if (player.Contains(game.ElementAt(i + 1)))
+                                {
+                                    break;
+                                }
+                            }
+
+                            if (player.Contains(player_example))
+                            {
+                                string q = player.Substring(player.IndexOf('(') + 1);
+                                q = q.Remove(q.IndexOf(','));
+                                if (players.Contains(q))
+                                {
+                                    continue;
+                                }
+                                else players.Add(q);
+                            }
+
+                        }
+                        string g = game.ElementAt(i).Substring(46);
+                        string times = game.ElementAt(i);
+                        times = times.Remove(times.IndexOf(' '), times.Length - times.IndexOf(' '));
+                        times = times.Replace(':', '.');
+                        var gg = g.Remove(g.IndexOf(','), g.Length - g.IndexOf(','));
+
+                        string path = dir + "\\" + times + " [" + gg + "].txt";
+                        bool append = false;                                                       // Если нужно перезаписывать файл
+                        StreamWriter outputs = new StreamWriter(path, append);                     // Создаем поток для записи в файл
+
+                        if (!File.Exists(path))
+                        {
+                            File.Create(path);                                 // Если файла не существует, создаем
+                        }
+
+                        for (int j = 0; j < players.Count; j++)
+                        {
+                            outputs.WriteLine(players.ElementAt(j));
+                        }
+                        outputs.Close();
+                        this.comboBox1.Items.Add(new SelectData(path, times + " [" + gg + "]"));
+                    }
+                fs2.Close();
+            }
+
+        }
 
         private void new_pilots_Click(object sender, EventArgs e)
         {
@@ -465,6 +568,44 @@ namespace _Star_Conflict_Stat_list_viewer
         private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             FinishExcel(app);
+        }
+
+        private void read_log_button_Click(object sender, EventArgs e)
+        {
+            
+        }
+
+        private void work_button_Click(object sender, EventArgs e)
+        {
+            read_log_for_gamelist();
+        }
+
+        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            load_to_datagridview_table.Enabled = true;
+            
+            pilots_list = ((SelectData)this.comboBox1.SelectedItem).Value;
+            flot_have.Text = null;
+            StreamReader new_stream_combo = new StreamReader(pilots_list);      // создаем поток для считывания списка пилотов
+            while (!new_stream_combo.EndOfStream)                                       // пока не прочитаем весь файл
+            {
+                flot_have.Text = flot_have.Text + new_stream_combo.ReadLine() + Environment.NewLine; // добавляем пилотов текстбокс с составом флота
+            }
+            new_stream_combo.Close();
+        }
+    }
+    class SelectData
+    {
+        public readonly string Value;
+        public readonly string Text;
+        public SelectData(string Value, string Text)
+        {
+            this.Value = Value;
+            this.Text = Text;
+        }
+        public override string ToString()
+        {
+            return this.Text;
         }
     }
 }
